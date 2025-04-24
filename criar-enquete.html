@@ -1,0 +1,26 @@
+<div class="auth-container">
+    <h1>Criar Enquete</h1>
+    <form action="/criar-enquete" method="POST">
+        <label for="pergunta">Pergunta:</label>
+        <input type="text" id="pergunta" name="pergunta" required>
+
+        <label>Opções (mínimo 2):</label>
+        <input type="text" name="opcao1" placeholder="Opção 1" required>
+        <input type="text" name="opcao2" placeholder="Opção 2" required>
+        <div id="mais-opcoes"></div>
+        <button type="button" onclick="adicionarOpcao()">+ Adicionar Opção</button>
+
+        <button type="submit">Publicar Enquete</button>
+    </form>
+</div>
+
+<script>
+    function adicionarOpcao() {
+        const div = document.getElementById("mais-opcoes");
+        const novoInput = document.createElement("input");
+        novoInput.type = "text";
+        novoInput.name = "opcao" + (div.children.length + 3);
+        novoInput.placeholder = "Opção " + (div.children.length + 3);
+        div.appendChild(novoInput);
+    }
+</script>
