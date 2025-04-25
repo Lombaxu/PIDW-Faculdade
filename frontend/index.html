@@ -3,35 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VotaFácil | Página Inicial</title>
+    <title>VotaFácil</title>
     <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
     <header>
         <h1>VotaFácil</h1>
-        <nav>
-            <a href="login.html">Entrar</a>
-            <a href="cadastro.html">Cadastrar</a>
+        <nav id="nav-menu">
+            <!-- Menu será preenchido pelo JavaScript -->
         </nav>
     </header>
 
     <main>
         <section class="enquetes">
-            <h2>Enquetes Populares</h2>
-            <div class="enquete-card">
-                <h3>Qual seu filme favorito?</h3>
-                <div class="opcoes">
-                    <button>Ação</button>
-                    <button>Comédia</button>
-                    <button>Ficção Científica</button>
-                </div>
-                <p>Total de votos: 120</p>
-            </div>
+            <h2>Enquetes Ativas</h2>
+            <div id="lista-enquetes"></div>
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2024 EnqueteFácil. Todos os direitos reservados.</p>
-    </footer>
+    <script>
+        const usuarioLogado = localStorage.getItem('usuarioLogado');
+        const navMenu = document.getElementById('nav-menu');
+    
+        if (usuarioLogado) {
+            navMenu.innerHTML = `
+                <a href="criar-enquete.html">Criar Enquete</a>
+                <a href="#" onclick="logout()">Sair</a>
+            `;
+        } else {
+            navMenu.innerHTML = `
+                <a href="login.html">Entrar</a>
+                <a href="cadastro.html">Cadastrar</a>
+            `;
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            const enquetes = JSON.parse(localStorage.getItem('enquetes')) || [];
+            const lista = document.getElementById("lista-enquetes");
+    
+            enquetes.forEach(enquete => {
+                const usuarioJaVotou = enquete.votantes && enquete.votantes.includes(usuarioLogado);
+                lista.innerHTML += `
+                    <div class="enquete-card">
+                        <h3>${enquete.pergunta}</h3>
+                        <div class="opcoes">
+                            ${enquete.opcoes.map((opcao, i) => 
+                                usuarioJaVotou 
+                                    ? `<button disabled>${opcao} (${enquete.votos[i]})</button>`
+                                    : `<button onclick="votar(${enquete.id}, ${i})">${opcao}</button>`
+                            ).join('')}
+                        </div>
+                        ${usuarioJaVotou ? '<p class="aviso">Você já votou nesta enquete!</p>' : ''}
+                    </div>
+                `;
+            });
+        });
+    
+        function votar(enqueteId, opcaoIndex) {
+            const usuarioLogado = localStorage.getItem('usuarioLogado');
+            if (!usuarioLogado) {
+                alert("Faça login para votar!");
+                window.location.href = "login.html";
+                return;
+            }
+    
+            const enquetes = JSON.parse(localStorage.getItem('enquetes'));
+            const enquete = enquetes.find(e => e.id === enqueteId);
+    
+            if (!enquete.votantes) enquete.votantes = [];
+            if (enquete.votantes.includes(usuarioLogado)) {
+                alert("Você já votou nesta enquete!");
+                return;
+            }
+    
+            enquete.votos[opcaoIndex]++;
+            enquete.votantes.push(usuarioLogado);
+            localStorage.setItem('enquetes', JSON.stringify(enquetes));
+            alert(`Voto registrado em: ${enquete.opcoes[opcaoIndex]}`);
+            window.location.reload();
+        }
+    
+        function logout() {
+            localStorage.removeItem('usuarioLogado');
+            window.location.href = "index.html";
+        }
+    </script>
 </body>
 </html>

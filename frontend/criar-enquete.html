@@ -1,26 +1,75 @@
-<div class="auth-container">
-    <h1>Criar Enquete</h1>
-    <form action="/criar-enquete" method="POST">
-        <label for="pergunta">Pergunta:</label>
-        <input type="text" id="pergunta" name="pergunta" required>
+<!DOCTYPE html>
+<html lang="pt-BR">
 
-        <label>Opções (mínimo 2):</label>
-        <input type="text" name="opcao1" placeholder="Opção 1" required>
-        <input type="text" name="opcao2" placeholder="Opção 2" required>
-        <div id="mais-opcoes"></div>
-        <button type="button" onclick="adicionarOpcao()">+ Adicionar Opção</button>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Enquete | VotaFácil</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
 
-        <button type="submit">Publicar Enquete</button>
-    </form>
-</div>
+<body>
+    <header>
+        <h1>VotaFácil</h1>
+        <nav>
+            <a href="index.html">Início</a>
+            <a href="login.html">Sair</a>
+        </nav>
+    </header>
 
-<script>
-    function adicionarOpcao() {
-        const div = document.getElementById("mais-opcoes");
-        const novoInput = document.createElement("input");
-        novoInput.type = "text";
-        novoInput.name = "opcao" + (div.children.length + 3);
-        novoInput.placeholder = "Opção " + (div.children.length + 3);
-        div.appendChild(novoInput);
-    }
-</script>
+    <main>
+        <div class="auth-container">
+            <h1>Criar Enquete</h1>
+            <form onsubmit="event.preventDefault(); criarEnquete()">
+                <label for="pergunta">Pergunta:</label>
+                <input type="text" id="pergunta" required>
+
+                <label>Opções (mínimo 2):</label>
+                <input type="text" class="opcao" placeholder="Opção 1" required>
+                <input type="text" class="opcao" placeholder="Opção 2" required>
+                <div id="mais-opcoes"></div>
+
+                <button type="button" onclick="adicionarOpcao()">+ Adicionar Opção</button>
+                <button type="submit">Publicar Enquete</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        function adicionarOpcao() {
+            const container = document.getElementById("mais-opcoes");
+            const novaOpcao = document.createElement("input");
+            novaOpcao.type = "text";
+            novaOpcao.className = "opcao";
+            novaOpcao.placeholder = `Opção ${container.children.length + 3}`;
+            container.appendChild(novaOpcao);
+        }
+
+        function criarEnquete() {
+            const enquetes = JSON.parse(localStorage.getItem('enquetes')) || [];
+            const pergunta = document.getElementById("pergunta").value;
+            const opcoes = Array.from(document.querySelectorAll(".opcao"))
+                .map(input => input.value.trim())
+                .filter(opcao => opcao !== "");
+
+            if (opcoes.length < 2) {
+                alert("Adicione pelo menos 2 opções!");
+                return;
+            }
+
+            enquetes.push({
+                id: Date.now(),
+                pergunta,
+                opcoes,
+                votos: new Array(opcoes.length).fill(0),
+                votantes: []
+            });
+
+            localStorage.setItem('enquetes', JSON.stringify(enquetes));
+            alert("Enquete criada!");
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+
+</html>
